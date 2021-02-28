@@ -175,6 +175,7 @@ def main():
 
     # get all pairs currently available
     all_symbols = pd.DataFrame(requests.get(f'{API_BASE}exchangeInfo').json()['symbols'])
+    all_symbols = all_symbols[all_symbols['quoteAsset'] == 'USDT']
     all_pairs = [tuple(x) for x in all_symbols[['baseAsset', 'quoteAsset']].to_records(index=False)]
 
     # randomising order helps during testing and doesn't make any difference in production
@@ -193,16 +194,6 @@ def main():
             print(f'{datetime.now()} {n}/{n_count} Wrote {new_lines} new lines to file for {base}-{quote}')
         else:
             print(f'{datetime.now()} {n}/{n_count} Already up to date with {base}-{quote}')
-
-    # clean the data folder and upload a new version of the dataset to kaggle
-    try:
-        os.remove('compressed/.DS_Store')
-    except FileNotFoundError:
-        pass
-    write_metadata(n_count)
-    yesterday = date.today() - timedelta(days=1)
-    subprocess.run(['kaggle', 'datasets', 'version', '-p', 'compressed/', '-m', f'full update of all {n_count} pairs up to {str(yesterday)}'])
-    os.remove('compressed/dataset-metadata.json')
 
 
 if __name__ == '__main__':
