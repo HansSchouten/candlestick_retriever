@@ -176,6 +176,9 @@ def main():
     # get all pairs currently available
     all_symbols = pd.DataFrame(requests.get(f'{API_BASE}exchangeInfo').json()['symbols'])
     all_symbols = all_symbols[all_symbols['quoteAsset'] == 'USDT']
+    all_symbols = all_symbols[all_symbols['isSpotTradingAllowed'] == True]
+    all_symbols = all_symbols[~all_symbols['baseAsset'].str.contains('BULL')]
+    all_symbols = all_symbols[~all_symbols['baseAsset'].str.contains('BEAR')]
     all_pairs = [tuple(x) for x in all_symbols[['baseAsset', 'quoteAsset']].to_records(index=False)]
 
     # randomising order helps during testing and doesn't make any difference in production
