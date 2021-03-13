@@ -179,6 +179,9 @@ def main():
     all_symbols = all_symbols[all_symbols['isSpotTradingAllowed'] == True]
     all_symbols = all_symbols[~all_symbols['baseAsset'].str.contains('BULL')]
     all_symbols = all_symbols[~all_symbols['baseAsset'].str.contains('BEAR')]
+    blacklist = ['AUD', 'BUSD', 'BCHABC', 'BCHSV', 'DAI', 'EUR', 'GBP', 'PAX', 'TUSD', 'USDC', 'USDSB', 'USDS']
+    for coin in blacklist:
+        all_symbols = all_symbols[all_symbols['baseAsset'] != coin]
     all_pairs = [tuple(x) for x in all_symbols[['baseAsset', 'quoteAsset']].to_records(index=False)]
 
     # randomising order helps during testing and doesn't make any difference in production
