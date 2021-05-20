@@ -22,6 +22,7 @@ import pandas as pd
 
 import preprocessing as pp
 
+START_TIME = (datetime.now() - timedelta(hours=0, minutes=5))
 API_BASE = 'https://api.binance.com/api/v3/'
 
 LABELS = [
@@ -94,7 +95,9 @@ def get_batch(symbol, interval='1m', start_time=0, limit=1000):
         return get_batch(symbol, interval, start_time, limit)
 
     if response.status_code == 200:
-        return pd.DataFrame(response.json(), columns=LABELS)
+        df = pd.DataFrame(response.json(), columns=LABELS)
+        df = df[df.open_time < START_TIME.timestamp() * 1000]
+        return df
     print(f'Got erroneous response back: {response}')
     return pd.DataFrame([])
 

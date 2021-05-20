@@ -8,6 +8,14 @@ Retrieve all historical candlestick data from crypto exchange Binance and upload
 - `pyarrow`
 - `kaggle`
 
+```
+sudo apt-get install python3-dev
+python3 -m pip install pand
+python3 -m pip install requests
+python3 -m pip install pyarrow
+python3 -m pip install fastparquet
+```
+
 ## Running
 
 Simply run `./main.py` to either download or update every single pair available:

@@ -128,12 +128,13 @@ def write_raw_to_parquet(df, full_path):
     #df = df[df.index < str(date.today())]
 
     # post processing for FDA
-    df['datetime'] = df.index
-    df.reset_index(drop=True, inplace=True)
-    df = addMissingMinutesDf(df)
-    df.reset_index(drop=True, inplace=True)
+    df_copy = df.copy()
+    df_copy['datetime'] = df_copy.index
+    df_copy.reset_index(drop=True, inplace=True)
+    df_copy = addMissingMinutesDf(df_copy)
+    df_copy.reset_index(drop=True, inplace=True)
 
-    df.to_parquet(full_path)
+    df_copy.to_parquet(full_path)
 
 
 def groom_data(dirname='data'):
