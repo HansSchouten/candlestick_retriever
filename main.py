@@ -118,8 +118,8 @@ def all_candles_to_csv(base, quote, interval='1m'):
 
     while previous_timestamp != last_timestamp:
         # stop if we reached data from today
-        if date.fromtimestamp(last_timestamp / 1000) >= date.today():
-            break
+        #if date.fromtimestamp(last_timestamp / 1000) >= date.today():
+        #    break
 
         previous_timestamp = last_timestamp
 
