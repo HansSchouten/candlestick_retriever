@@ -98,7 +98,7 @@ def get_batch(symbol, interval='1m', start_time=0, limit=1000):
     print(f'Got erroneous response back: {response}')
     return pd.DataFrame([])
 
-def addMissingMinutesDf(self, df):
+def addMissingMinutesDf(df):
     """
     Repeat entries of the given dataframe to fill up for missing minutes.
     
