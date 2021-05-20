@@ -98,15 +98,6 @@ def get_batch(symbol, interval='1m', start_time=0, limit=1000):
     print(f'Got erroneous response back: {response}')
     return pd.DataFrame([])
 
-def addMissingMinutesDf(df):
-    """
-    Repeat entries of the given dataframe to fill up for missing minutes.
-    
-    """
-    historicalDataDict = addMissingMinutes(df.to_dict('records'))
-    historicalData = pd.DataFrame(historicalDataDict)
-    return historicalData
-
 def all_candles_to_csv(base, quote, interval='1m'):
     """Collect a list of candlestick batches with all candlesticks of a trading pair,
     concat into a dataframe and write it to CSV.
@@ -161,12 +152,6 @@ def all_candles_to_csv(base, quote, interval='1m'):
     full_path = f'compressed/{parquet_name}'
     df = pd.concat(batches, ignore_index=True)
     df = pp.quick_clean(df)
-    
-    # post processing for FDA
-    df['datetime'] = df.index
-    df.reset_index(drop=True, inplace=True)
-    df = addMissingMinutesDf(df)
-    df.reset_index(drop=True, inplace=True)
     
     pp.write_raw_to_parquet(df, full_path)
     METADATA['data'].append({

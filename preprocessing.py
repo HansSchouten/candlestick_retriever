@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 
@@ -74,6 +74,44 @@ def quick_clean(df):
     return df
 
 
+def addMissingMinutes(initialData):
+    """
+    Repeat entries to fill up for missing minutes.
+
+    """
+    cleanData = []
+    previousRow = []
+    for row in initialData:
+        if len(previousRow) and row['datetime'] - previousRow['datetime'] > timedelta(minutes=1):
+            current = previousRow.copy()
+            while current['datetime'] + timedelta(minutes=1) < row['datetime']:
+                current['datetime'] = current['datetime'] + timedelta(minutes=1)
+                current['volume'] = 0
+                current['quote_asset_volume'] = 0
+                current['number_of_trades'] = 0
+                current['taker_buy_base_asset_volume'] = 0
+                current['taker_buy_quote_asset_volume'] = 0
+                current['low'] = current['close']
+                current['high'] = current['close']
+                current['open'] = current['close']
+                missingRow = current.copy()
+                cleanData.append(missingRow)
+
+        previousRow = row.copy()
+        cleanData.append(row)
+
+    return cleanData
+
+def addMissingMinutesDf(df):
+    """
+    Repeat entries of the given dataframe to fill up for missing minutes.
+    
+    """
+    historicalDataDict = addMissingMinutes(df.to_dict('records'))
+    historicalData = pd.DataFrame(historicalDataDict)
+    return historicalData
+
+
 def write_raw_to_parquet(df, full_path):
     """takes raw df and writes a parquet to disk"""
 
@@ -87,7 +125,13 @@ def write_raw_to_parquet(df, full_path):
     df = set_dtypes_compressed(df)
 
     # give all pairs the same nice cut-off
-    df = df[df.index < str(date.today())]
+    #df = df[df.index < str(date.today())]
+
+    # post processing for FDA
+    df['datetime'] = df.index
+    df.reset_index(drop=True, inplace=True)
+    df = addMissingMinutesDf(df)
+    df.reset_index(drop=True, inplace=True)
 
     df.to_parquet(full_path)
 
