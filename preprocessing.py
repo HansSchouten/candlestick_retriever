@@ -74,16 +74,16 @@ def quick_clean(df):
     return df
 
 
-def addMissingMinutes(initialData):
+def add_missing_minutes(initialData):
     """
     Repeat entries to fill up for missing minutes.
 
     """
-    cleanData = []
-    previousRow = []
+    clean_data = []
+    previous_row = []
     for row in initialData:
-        if len(previousRow) and row['datetime'] - previousRow['datetime'] > timedelta(minutes=1):
-            current = previousRow.copy()
+        if len(previous_row) and row['datetime'] - previous_row['datetime'] > timedelta(minutes=1):
+            current = previous_row.copy()
             while current['datetime'] + timedelta(minutes=1) < row['datetime']:
                 current['datetime'] = current['datetime'] + timedelta(minutes=1)
                 current['volume'] = 0
@@ -95,19 +95,19 @@ def addMissingMinutes(initialData):
                 current['high'] = current['close']
                 current['open'] = current['close']
                 missingRow = current.copy()
-                cleanData.append(missingRow)
+                clean_data.append(missingRow)
 
-        previousRow = row.copy()
-        cleanData.append(row)
+        previous_row = row.copy()
+        clean_data.append(row)
 
-    return cleanData
+    return clean_data
 
-def addMissingMinutesDf(df):
+def add_missing_minutes_df(df):
     """
     Repeat entries of the given dataframe to fill up for missing minutes.
     
     """
-    historicalDataDict = addMissingMinutes(df.to_dict('records'))
+    historicalDataDict = add_missing_minutes(df.to_dict('records'))
     historicalData = pd.DataFrame(historicalDataDict)
     return historicalData
 
@@ -117,7 +117,7 @@ def write_raw_to_parquet(df, full_path):
 
     # some candlesticks do not span a full minute
     # these points are not reliable and thus filtered
-    df = df[~(df['open_time'] - df['close_time'] != -59999)]
+    #df = df[~(df['open_time'] - df['close_time'] != -59999)]
 
     # `close_time` column has become redundant now, as is the column `ignore`
     df = df.drop(['close_time', 'ignore'], axis=1)
@@ -130,8 +130,10 @@ def write_raw_to_parquet(df, full_path):
     # post processing for FDA
     df_copy = df.copy()
     df_copy['datetime'] = df_copy.index
+    df_copy['datetime'] = df_copy['datetime'].dt.floor('Min')
+    df_copy = df_copy.drop_duplicates(subset=['datetime'], keep='first')
     df_copy.reset_index(drop=True, inplace=True)
-    df_copy = addMissingMinutesDf(df_copy)
+    df_copy = add_missing_minutes_df(df_copy)
     df_copy.reset_index(drop=True, inplace=True)
 
     df_copy.to_parquet(full_path)
